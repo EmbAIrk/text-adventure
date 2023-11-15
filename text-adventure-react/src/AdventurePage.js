@@ -8,13 +8,14 @@ const AdventurePage = ({ location }) => {
   const [userNotes, setUserNotes] = useState('');
 
   //Read querystring parameters
+  /*
   useEffect(() => {
     const queryParams = new URLSearchParams(location?.search);
     const gameplayType = queryParams.get('gameplayType') || '';
     const modifiers = queryParams.get('modifiers') || '';
     const savedGameKey = queryParams.get('savedGameKey') || '';
 
-  }, [location]);
+  }, [location]); Potentially not needed for the way that the modifiers are being passed*/ 
 
   const handleUserInput = () => {
     setOutput(`You entered: ${userInput}`);
