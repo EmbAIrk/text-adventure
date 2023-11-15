@@ -1,25 +1,27 @@
-import logo from './logo.svg';
+// App.js
+import React, { useState } from 'react';
+import StartupPage from './StartupPage';
+import AdventurePage from './AdventurePage';
 import './App.css';
 
-function App() {
+const App = () => {
+  const [showAdventurePage, setShowAdventurePage] = useState(false);
+  const [gameOptions, setGameOptions] = useState(null);
+
+  const handleStartGame = (options) => {
+    setGameOptions(options);
+    setShowAdventurePage(true);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {showAdventurePage ? (
+        <AdventurePage gameOptions={gameOptions} />
+      ) : (
+        <StartupPage onStartGame={handleStartGame} />
+      )}
     </div>
   );
-}
+};
 
 export default App;
