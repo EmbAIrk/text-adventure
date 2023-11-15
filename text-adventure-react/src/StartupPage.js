@@ -7,7 +7,7 @@ const StartupPage = ({ onStartGame }) => {
   const [savedGameKey, setSavedGameKey] = useState('');
 
   const handleEmbark = () => {
-    // Data validation??
+    // Placeholder for data validation
 
 
     // Otherwise just trigger the start of the game

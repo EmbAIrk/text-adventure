@@ -1,8 +1,27 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+// App.js
+import React, { useState } from 'react';
+import StartupPage from './StartupPage';
+import AdventurePage from './AdventurePage';
+import './App.css';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
+const App = () => {
+  const [showAdventurePage, setShowAdventurePage] = useState(false);
+  const [gameOptions, setGameOptions] = useState(null);
+
+  const handleStartGame = (options) => {
+    setGameOptions(options);
+    setShowAdventurePage(true);
+  };
+
+  return (
+    <div>
+      {showAdventurePage ? (
+        <AdventurePage gameOptions={gameOptions} />
+      ) : (
+        <StartupPage onStartGame={handleStartGame} />
+      )}
+    </div>
+  );
+};
+
+export default App;
