@@ -13,4 +13,5 @@ async def getStream():
 
 @app.get("requestTest")
 async def test():
-    return StreamingResponse(GPT.testgenerator())
+    gen = StreamingResponse(GPT.testgenerator())
+    return gen
