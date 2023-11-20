@@ -1,6 +1,11 @@
 from openai import OpenAI
 
 class GPT:
+  
+  def testgenerator():
+    s = ["a", "b", "c", "d"]
+    for i in s:
+      yield s
     
   def connect_api(userMessage, assistantText):
     if (userMessage is None or assistantText is None):
