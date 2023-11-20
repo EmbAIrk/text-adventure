@@ -1,15 +1,16 @@
+import uvicorn
 from typing import Union
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-import uvicorn
+from backend.gpt import GPT
 
 app = FastAPI()
 
-async def stream():
-    for i in range(10):
-        yield b"byte_stream"
+@app.get("request")
+async def getStream():
+    return StreamingResponse(GPT.connect_api("Give me a list of healthy groceries","1:Apple, 2:Bread, 3:Strawberry"))
 
 
-@app.get("/")
-async def main():
-    return StreamingResponse(stream())
+@app.get("requestTest")
+async def test():
+    return StreamingResponse(GPT.testgenerator())
