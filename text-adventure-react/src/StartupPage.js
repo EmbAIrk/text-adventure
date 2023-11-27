@@ -1,5 +1,6 @@
 // StartupPage.js
 import React, { useState } from 'react';
+import './App.css';
 
 const StartupPage = ({ onStartGame }) => {
   const [gameplayType, setGameplayType] = useState('');
@@ -16,44 +17,59 @@ const StartupPage = ({ onStartGame }) => {
 
   return (
     <div>
-      <h1>EmbAIrk Text Adventure</h1>
+      <h1 className="title">EmbAIrk Text Adventure</h1>
+      <div className="container">
+      <div className="left-column title">
+        <h2>New Game</h2>
       <label>
         Select Gameplay Type:
+        </label>
         <select
           value={gameplayType}
           onChange={(e) => setGameplayType(e.target.value)}
         >
-          <option value="">Select</option>
-          <option value="type1">Gameplay Type 1</option>
-          <option value="type2">Gameplay Type 2</option>
+          <option value="">Gameplay Type</option>
+          <option value="type1">Custom Game</option>
+          <option value="type2">Pre-Determined Theme</option>
         </select>
-      </label>
+      
 
       <br />
 
       <label>
         Modifiers:
+        </label>
         <input
           type="text"
           value={modifiers}
           onChange={(e) => setModifiers(e.target.value)}
+          placeholder="Add a theme, choose special characters, etc."
+          
         />
-      </label>
-
+        <br />
+        <button onClick={handleEmbark}>Embark</button>
+      
+      </div>
       <br />
-
+      <div className="right-column title" >
+        <h2 className="title">Continue Previous Save</h2>
       <label>
         Enter Previous Saved Game Key:
+        </label>
         <input
           type="text"
           value={savedGameKey}
           onChange={(e) => setSavedGameKey(e.target.value)}
         />
-      </label>
+        <br/>
+      <button onClick={handleEmbark}>Continue Adventure</button>
 
       <br />
 
-      <button onClick={handleEmbark}>Embark</button>
+      
+      </div>
+    </div>
+    
     </div>
   );
 };
