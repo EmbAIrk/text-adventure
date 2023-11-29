@@ -2,7 +2,12 @@ import os
 from openai import OpenAI
 
 class GPT:
-    
+
+  def testgenerator():
+    s = ["a", "b", "c", "d"]
+    for i in s:
+      yield s
+
   def connect_api(texts):  
     if (texts is None):
       raise ("Null parameters are not accepted for this method.")
