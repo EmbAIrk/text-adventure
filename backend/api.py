@@ -1,6 +1,6 @@
 import uvicorn
 import json
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from backend.gpt import GPT
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,8 +31,9 @@ async def getStream(test_str):
     converted = [json.loads(idx.replace("'", '"')) for idx in test_str]
     return StreamingResponse(GPT.connect_api(converted))
 
-@app.get('/requestTest')
-async def test():
+@app.post('/requestTest')
+async def test(request: Request):
+    print(await request.json())
     gen = StreamingResponse(GPT.testgenerator())
     return gen
 
