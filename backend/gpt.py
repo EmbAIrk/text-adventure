@@ -11,8 +11,6 @@ class GPT:
   def connect_api(userMessage, assistantText):
     if (userMessage is None or assistantText is None):
       raise TypeError("Null inputs are not valid for this method.")
-  
-      yield s
 
   def connect_api(texts):  
     if (texts is None):
