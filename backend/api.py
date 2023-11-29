@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from backend.gpt import GPT
 from fastapi.middleware.cors import CORSMiddleware
-from database import Database
+from backend.database import Database
 
 
 app = FastAPI()

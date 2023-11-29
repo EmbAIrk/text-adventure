@@ -6,7 +6,7 @@ class GPT:
   def testgenerator():
     s = ["a", "b", "c", "d"]
     for i in s:
-      yield s
+      yield i
 
   def connect_api(texts):  
     if (texts is None):
