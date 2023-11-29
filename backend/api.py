@@ -26,15 +26,15 @@ app.add_middleware(
 
 db = Database("sqlite:///game_database.db")
 
-@app.get('/request')
-async def getStream(test_str):
-    converted = [json.loads(idx.replace("'", '"')) for idx in test_str]
+@app.post('/request')
+async def getStream(request: Request):
+    converted = await request.json()
     return StreamingResponse(GPT.connect_api(converted))
 
 @app.post('/requestTest')
 async def test(request: Request):
-    print(await request.json())
-    gen = StreamingResponse(GPT.testgenerator())
+    texts = await request.json()
+    gen = StreamingResponse(GPT.testgenerator(texts))
     return gen
 
 @app.post('/saveGame')
