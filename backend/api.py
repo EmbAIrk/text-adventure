@@ -1,5 +1,3 @@
-import uvicorn
-import json
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from backend.gpt import GPT
