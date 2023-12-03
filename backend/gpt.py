@@ -1,6 +1,6 @@
-import os
 import time
 import openai
+import tiktoken
 
 class GPT:
 
@@ -9,16 +9,39 @@ class GPT:
     for i in s:
       yield i
 
-  def connect_api(texts):  
+  def connect_api(texts: list):  
     if (texts is None):
       raise ("Null parameters are not accepted for this method.")
 
+    # systemMsg = "You are a text adventure author. Your goal is to set up a fun, but challenging, adventure for players " + \
+    #             "to make their way through to reach a certain goal. The players may only use items that were described in the scene. " + \
+    #             "List the current items the player has in their possession after every interaction. If the player does not have any items, mention it. " + \
+    #             "Do not put items into players possession unless told otherwise. Draw a picture of the current area using emojis. " + \
+    #             "The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection. "
+    
+    # for debugging, comment out when not using
+    systemMsg = "You are a helpful assistant. "
+
+    if (texts[0]["role"] == "system"):
+      systemMsg += texts[0]["content"]
+      texts.pop(0)
+    
     prompt =[
-       #comment out so we don't use a ton of tokens when testing unrelated things
-       #{"role": "system", "content": "You are a text adventure author. Your goal is to set up a fun, but challenging, adventure for players to make their way through in order to reach a certain goal. The players may only use items that were described in the scene. List the current items that the player has in their possession after every interaction. If the player does not have any items, mention it. Do not put items into players possession unless told otherwise. Draw a picture of the current area using emojis. The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection."},
+       {"role": "system", "content": systemMsg},
      ]
     prompt.extend(texts)
 
+    # count and trim tokens
+    allText = ""
+    for c in prompt:
+      allText += c["content"]
+    
+    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    numTokens = len(enc.encode(allText))
+    while (numTokens >= 500): # This number is our imposed token limit, if GPT is hallucinating too much we can increase it.
+      item = prompt.pop(1) # remove second item because first one is system message
+      numTokens -= len(enc.encode(item["content"]))
+      
     #ADD THIS LATER :)
     #client = OpenAI(api_key=os.environ.get('API_Key'))
 
