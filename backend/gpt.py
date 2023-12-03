@@ -4,7 +4,7 @@ import openai
 
 class GPT:
 
-  def testgenerator():
+  def testgenerator(texts):
     s = ["a", "b", "c", "d"]
     for i in s:
       yield i
@@ -21,7 +21,7 @@ class GPT:
      #ADD THIS LATER :)
      #client = OpenAI(api_key=os.environ.get('API_Key'))
      
-    client = openai.OpenAI(api_key="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")
+    client = openai.OpenAI(api_key="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")#Brock's personal key
     if (prompt is not None):
        try:
          response = client.chat.completions.create(

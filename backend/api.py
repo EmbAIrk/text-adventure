@@ -12,6 +12,7 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
+    "http://localhost:3000",
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -29,7 +30,7 @@ async def getStream(request: Request):
     return StreamingResponse(GPT.connect_api(converted))
 
 @app.post('/requestTest')
-async def test(request: Request):
+async def getStream(request: Request):
      texts = await request.json()
      gen = StreamingResponse(GPT.testgenerator(texts))
      return gen
