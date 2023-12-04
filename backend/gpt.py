@@ -3,13 +3,31 @@ import openai
 import tiktoken
 
 class GPT:
-
+  
   def testgenerator():
+    """
+    A test method to mock connect_api.
+
+    Returns: 
+      a string chunk of generated data.
+
+    """
     s = ["a", "b", "c", "d"]
     for i in s:
       yield i
 
+
   def connect_api(texts: list):  
+    """
+    Sends a prompt to GPT through api calls, accounts for token limit.
+
+    Args:
+      list: a list of strings pertaining additions to the prompt.
+
+    Returns: 
+      a generator object comprising of string chunks returned by GPT 
+    
+    """
     if (texts is None):
       raise ("Null parameters are not accepted for this method.")
 
@@ -51,7 +69,8 @@ class GPT:
         response = client.chat.completions.create(
           model="gpt-3.5-turbo",
           stream =True,
-          messages=prompt
+          messages=prompt,
+          temperature=0.7
         )
         for chunk in response:
           data = chunk.choices[0].delta.content
