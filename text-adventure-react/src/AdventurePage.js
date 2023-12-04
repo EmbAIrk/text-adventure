@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import './App.js';
+import './StartupPage.js';
 
 const AdventurePage = () => {
   //const [output, setOutput] = useState('');
@@ -23,29 +25,43 @@ const AdventurePage = () => {
       ...prevConversation,
       {role: 'user', content: userInput}
     ]);
+    
     //setOutput((prevOutput) => `${prevOutput}\nYou entered: ${userInput}\n${lastResponse}`);
     fetchResponse();
-    console.log(formatConversation);
+    //parseInventory(lastResponse);
+    console.log(lastResponse);
     setUserInput('');
-    //sendUserInputToServer(userInput);
+    
+    //console.log(formatConversation);
+    //console.log(inventory);
+    
   };
 
   const fetchResponse = async () => {
     setIsPending(true);
     try {
-      const role='user'
       const response = await fetch('http://localhost:8000/request', {
         method: 'POST',
         /*headers: {
           'Content-Type': 'application/json', 
           'Authorization': 'Bearer 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',
         },*/
-        body: JSON.stringify([{
-          role: role,
-          content: userInput
-        }]),
+        body: JSON.stringify([
+          {
+            role: 'system',
+            content: "Make sure to list the items in my inventory in an unordered HTML list and format the message in HTML"
+          },
+          {
+          role: 'user',
+          content: userInput //+ "send response in HTML format including unordered list of items at beginning"
+        },
+        {role: 'assistant',
+          content: lastResponse
+        }, 
+        ]),
       });
-      
+      console.log(response.body);
+      setUserInput('');
       if (!response.body) {
         throw new Error('Response is empty!');
       }
@@ -59,10 +75,13 @@ const AdventurePage = () => {
         result = await reader.read();
       }
       setLastResponse(decodedResponse);
+      
       setFormatConversation((prevConversation) => [
         ...prevConversation,
         {role: 'GPT', content: decodedResponse },
       ]);
+
+      
       setIsPending(false);
     } catch (error) {
       console.error('There was an error processing the input', error);
@@ -91,17 +110,37 @@ const updateUserNoteList = () => {
     });
   };
 
-  const parseInventory = () => {
+  const parseInventory = (text) => {
+      const regex = /<li>(.*?)<\/li>/g;
+      const matches = text.match(regex);
 
+      if (matches) {
+        const items = matches.map(match => match.replace('<li>', '').replace('</li>', '').trim());
+        console.log(items);
+        setInventory(items);
+      }
   };
+
+  useEffect(() => {
+    parseInventory(lastResponse);
+  }, [lastResponse]);
+
+  /*useEffect(() => {
+    //console.log(initialResponse);
+      setUserInput(initialResponse);
+      const button = document.getElementById('submit');
+      button.click();
+      //fetchResponse();
+  }, [initialResponse]);*/
+
 
   return (
     <div style={{ display: 'flex', margin: '20px', justifyContent: 'center', alignItems: 'flex-start' }}>
       <div style={{ flex: 1, marginRight: '20px', height: '100vh' }}>
         <h1 style={{ textAlign: 'center', marginTop: '0' }}>Your Adventure</h1>
-        <div style={{ height: '75%', border: '1px solid #ddd', padding: '10px', marginBottom: '10px', overflowY: 'auto'}}>
+        <div style={{ height: '65%', border: '1px solid #ddd', padding: '30px', marginBottom: '10px', overflowY: 'auto'}}>
         {formatConversation.map((item, index) => (
-          <div key={index} style={{ textAlign: item.role === 'user' ? 'right' : 'left', marginBottom: '8px' }}>
+          <div key={index} style={{ textAlign: item.role === 'user' ? 'right' : 'left', marginBottom: '20px' }}>
             {item.role === 'user' ? (<div> <strong>You: </strong> {item.content} </div>): (<div><strong>Chat GPT: </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
           </div>
         ))}
@@ -135,7 +174,10 @@ const updateUserNoteList = () => {
         <div style={{ height: '250px', border: '1px solid #ddd', padding: '10px', marginBottom: '10px' }}>
         <h3 style={{margin: '0', textAlign: "center"}}>Inventory</h3>
           <ul>
-            {/* Placeholder for inventory list function */}
+            {inventory.map((item, index) => (
+            <li key ={index} style={{fontSize: '20px'}}dangerouslySetInnerHTML={{ __html: item }}>
+              </li>
+            ))}
           </ul>
         </div>
           

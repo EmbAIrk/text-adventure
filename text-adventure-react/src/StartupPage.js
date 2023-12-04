@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 const StartupPage = ({ onStartGame }) => {
-  const [gameplayType, setGameplayType] = useState('');
+  const [gameplayTheme, setGameplayTheme] = useState('');
   const [modifiers, setModifiers] = useState('');
   const [savedGameKey, setSavedGameKey] = useState('');
 
@@ -12,7 +12,7 @@ const StartupPage = ({ onStartGame }) => {
 
 
     // Otherwise just trigger the start of the game
-    onStartGame({ gameplayType, modifiers, savedGameKey });
+    onStartGame({ gameplayTheme, modifiers, savedGameKey }, "Space themed adventure");
   };
 
   return (
@@ -25,12 +25,15 @@ const StartupPage = ({ onStartGame }) => {
         Select Gameplay Type:
         </label>
         <select
-          value={gameplayType}
-          onChange={(e) => setGameplayType(e.target.value)}
+          value={gameplayTheme}
+          onChange={(e) => setGameplayTheme(e.target.value)}
         >
-          <option value="">Gameplay Type</option>
-          <option value="type1">Custom Game</option>
-          <option value="type2">Pre-Determined Theme</option>
+          <option value="" disabled>Gameplay Theme</option>
+          <option value="space">Space</option>
+          <option value="pirate">Pirate</option>
+          <option value="western">Wild West</option>
+          <option value="superhero">Super Hero</option>
+          <option value="custom">Custom</option>
         </select>
       
 
@@ -43,7 +46,7 @@ const StartupPage = ({ onStartGame }) => {
           type="text"
           value={modifiers}
           onChange={(e) => setModifiers(e.target.value)}
-          placeholder="Add a theme, choose special characters, etc."
+          placeholder="Add special characters or other custom modifications"
           
         />
         <br />
@@ -52,14 +55,16 @@ const StartupPage = ({ onStartGame }) => {
       </div>
       <br />
       <div className="right-column title" >
-        <h2 className="title">Continue Previous Save</h2>
+        <h2 className="title">Continue Previous Game</h2>
       <label>
-        Enter Previous Saved Game Key:
+        Enter Unique Saved Game Key:
         </label>
         <input
           type="text"
           value={savedGameKey}
           onChange={(e) => setSavedGameKey(e.target.value)}
+          placeholder="xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx"
+          style={{textAlign: 'center'}}
         />
         <br/>
       <button onClick={handleEmbark}>Continue Adventure</button>
