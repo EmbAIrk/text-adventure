@@ -3,19 +3,6 @@ import openai
 import tiktoken
 
 class GPT:
-  
-  def testgenerator():
-    """
-    A test method to mock connect_api.
-
-    Returns: 
-      a string chunk of generated data.
-
-    """
-    s = ["a", "b", "c", "d"]
-    for i in s:
-      yield i
-
 
   def connect_api(texts: list):  
     """
