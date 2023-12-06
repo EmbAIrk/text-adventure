@@ -15,10 +15,9 @@ class GPT:
 
     systemMsg = "You are a text adventure author. Your goal is to set up a fun, but challenging, adventure for players " + \
                  "to make their way through to reach a certain goal. The players may only use items that were described in the scene. " + \
-                 "On each response, list the current items the player has in their possession in an unordered HTML list. If the player does not have any items, mention it. " + \
                  "Do not put items into players possession unless told otherwise. Draw a picture of the current area using emojis. " + \
-                 "The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection. "
-    
+                 "The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection. " + \
+                "On each response, list the current items the player has in their possession in an unordered HTML list. If the player does not have any items, mention it. "
     # for debugging, comment out when not using
     # systemMsg = "You are a helpful assistant. "
 
@@ -36,11 +35,11 @@ class GPT:
     for c in prompt:
       allText += c["content"]
     
-    """enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
     numTokens = len(enc.encode(allText))
     while (numTokens >= 500): # This number is our imposed token limit, if GPT is hallucinating too much we can increase it.
       item = prompt.pop(1) # remove second item because first one is system message
-      numTokens -= len(enc.encode(item["content"]))"""
+      numTokens -= len(enc.encode(item["content"]))
       
     #ADD THIS LATER :)
     #client = OpenAI(api_key=os.environ.get('API_Key'))

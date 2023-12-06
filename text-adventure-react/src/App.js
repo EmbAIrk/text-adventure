@@ -6,21 +6,25 @@ import './App.css';
 
 const App = () => {
   const [showAdventurePage, setShowAdventurePage] = useState(false);
-  const [initialResponse, setInitialResponse] = useState('');
-  const [gameOptions, setGameOptions] = useState(null);
+  const [initialMessage, setInitialMessage] = useState('');
+  const [savedGameKey, setSavedGameKey] = useState('');
 
-  const handleStartGame = (options, initialResponse) => {
-    setGameOptions(options);
-    setInitialResponse(initialResponse);
+  const handleStartGame = (initialMessage) => {
+    setInitialMessage(initialMessage);
     setShowAdventurePage(true);
   };
+
+  const handleLoadGame = (savedGameKey) => {
+    setSavedGameKey(savedGameKey);
+    setShowAdventurePage(true);
+  }
 
   return (
     <div>
       {showAdventurePage ? (
-        <AdventurePage gameOptions={gameOptions} initialResponse={initialResponse} />
+        <AdventurePage savedGameKey={savedGameKey} initialMessage={initialMessage} />
       ) : (
-        <StartupPage onStartGame={handleStartGame} />
+        <StartupPage onStartGame={handleStartGame} onLoadGame={handleLoadGame} />
       )}
     </div>
   );

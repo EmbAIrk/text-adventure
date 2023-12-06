@@ -2,18 +2,32 @@
 import React, { useState } from 'react';
 import './App.css';
 
-const StartupPage = ({ onStartGame }) => {
+const StartupPage = ({ onStartGame, onLoadGame}) => {
   const [gameplayTheme, setGameplayTheme] = useState('');
   const [modifiers, setModifiers] = useState('');
-  const [savedGameKey, setSavedGameKey] = useState('');
+  const [savedGameKeyLocal, setSavedGameKeyLocal] = useState('');
 
   const handleEmbark = () => {
     // Placeholder for data validation
-
+    let initialMessage = '';
+    if (modifiers === '')
+    {
+    initialMessage = `Start a ${gameplayTheme}-themed choose your own adventure.`
+    }
+    else
+    {
+    initialMessage= `Start a ${gameplayTheme}-themed adventure
+    that includes these special modifiers: ${modifiers}`
+    }
 
     // Otherwise just trigger the start of the game
-    onStartGame({ gameplayTheme, modifiers, savedGameKey }, "Space themed adventure");
+    onStartGame(initialMessage);
   };
+
+  const handleContinueGame = () => {
+    onLoadGame(savedGameKeyLocal);
+  };
+
 
   return (
     <div>
@@ -61,13 +75,13 @@ const StartupPage = ({ onStartGame }) => {
         </label>
         <input
           type="text"
-          value={savedGameKey}
-          onChange={(e) => setSavedGameKey(e.target.value)}
+          value={savedGameKeyLocal}
+          onChange={(e) => setSavedGameKeyLocal(e.target.value)}
           placeholder="xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx"
           style={{textAlign: 'center'}}
         />
         <br/>
-      <button onClick={handleEmbark}>Continue Adventure</button>
+      <button onClick={handleContinueGame}>Continue Adventure</button>
 
       <br />
 

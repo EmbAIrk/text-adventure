@@ -3,7 +3,7 @@ import './App.css';
 import './App.js';
 import './StartupPage.js';
 
-const AdventurePage = () => {
+const AdventurePage = ({savedGameKey, initialMessage}) => {
   //const [output, setOutput] = useState('');
   const [lastResponse, setLastResponse] = useState('');
   const [userInput, setUserInput] = useState('');
@@ -14,6 +14,7 @@ const AdventurePage = () => {
   const [formatConversation, setFormatConversation] = useState([]);
   const [isGameSaved, setIsGameSaved] = useState(false);
   const [hoverIndex, setHoverIndex] = useState(null);
+  const [userKey, setUserKey] = useState('');
 
   const handleUserInput = () => {
     if (userInput === '')
@@ -21,13 +22,13 @@ const AdventurePage = () => {
       alert("Error: You must enter a response first!");
       return;
     }
-    setFormatConversation((prevConversation) => [
+   setFormatConversation((prevConversation) => [
       ...prevConversation,
       {role: 'user', content: userInput}
     ]);
     
     //setOutput((prevOutput) => `${prevOutput}\nYou entered: ${userInput}\n${lastResponse}`);
-    fetchResponse();
+    //fetchResponse();
     //parseInventory(lastResponse);
     console.log(lastResponse);
     setUserInput('');
@@ -40,27 +41,23 @@ const AdventurePage = () => {
   const fetchResponse = async () => {
     setIsPending(true);
     try {
+      
       const response = await fetch('http://localhost:8000/request', {
         method: 'POST',
         /*headers: {
           'Content-Type': 'application/json', 
           'Authorization': 'Bearer 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',
         },*/
-        body: JSON.stringify([
-          {
-            role: 'system',
-            content: "Make sure to list the items in my inventory in an unordered HTML list and format the message in HTML"
-          },
-          {
-          role: 'user',
-          content: userInput //+ "send response in HTML format including unordered list of items at beginning"
-        },
-        {role: 'assistant',
-          content: lastResponse
-        }, 
-        ]),
+        body: JSON.stringify(formatConversation.map((item) => ({
+          role: item.role,
+          content: item.content,
+        }))),
       });
-      console.log(response.body);
+      //console.log(formatConversation);
+      console.log('Request Body:', JSON.stringify(formatConversation.map((item) => ({
+        role: item.role,
+        content: item.content,
+      }))));
       setUserInput('');
       if (!response.body) {
         throw new Error('Response is empty!');
@@ -78,7 +75,7 @@ const AdventurePage = () => {
       
       setFormatConversation((prevConversation) => [
         ...prevConversation,
-        {role: 'GPT', content: decodedResponse },
+        {role: 'assistant', content: decodedResponse },
       ]);
 
       
@@ -89,9 +86,37 @@ const AdventurePage = () => {
   };
 
 
-  const saveGame = () => {
-    setIsGameSaved(true);
-  }
+  const saveGame = async () => {
+    setIsPending(true);
+    try {
+      const response = await fetch('http://localhost:8000/saveGame', {
+        method: 'POST',
+        body: JSON.stringify({
+          formatConversation: formatConversation.map((item) => ({
+            role: item.role,
+            content: item.content,
+          })),
+          notes: userNoteList.map((note) => note),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save game');
+      }
+  
+      const responseData = await response.json();
+     
+      //read in value returned from API
+      //const savedKey = responseData.something;
+      //setUserKey(savedKey);
+    } catch (error) {
+      console.error('Error saving game:', error);
+    } finally {
+      setIsPending(false);
+      setIsGameSaved(true);
+    }
+  };
+  
 
 const updateUserNoteList = () => {
   setUserNoteList((prevUserNoteList) => [
@@ -121,18 +146,31 @@ const updateUserNoteList = () => {
       }
   };
 
+  const undoAction = () => {
+    if (formatConversation.length > 2)
+    {
+      setFormatConversation((prevConversation) => 
+      prevConversation.slice(0, -2)
+    );
+      parseInventory(formatConversation[formatConversation.length - 1].content)
+      console.log(formatConversation);
+    }
+  }
+
   useEffect(() => {
     parseInventory(lastResponse);
   }, [lastResponse]);
 
-  /*useEffect(() => {
-    //console.log(initialResponse);
-      setUserInput(initialResponse);
-      const button = document.getElementById('submit');
-      button.click();
-      //fetchResponse();
-  }, [initialResponse]);*/
+  useEffect(() => {
+    const lastItem = formatConversation[formatConversation.length - 1];
+    if (formatConversation.length > 0 && lastItem.role !== 'assistant' ) {
+      fetchResponse();
+    }
+  }, [formatConversation]);
 
+  useEffect(() => {
+    setUserInput(initialMessage + savedGameKey);
+  }, []);
 
   return (
     <div style={{ display: 'flex', margin: '20px', justifyContent: 'center', alignItems: 'flex-start' }}>
@@ -141,7 +179,7 @@ const updateUserNoteList = () => {
         <div style={{ height: '65%', border: '1px solid #ddd', padding: '30px', marginBottom: '10px', overflowY: 'auto'}}>
         {formatConversation.map((item, index) => (
           <div key={index} style={{ textAlign: item.role === 'user' ? 'right' : 'left', marginBottom: '20px' }}>
-            {item.role === 'user' ? (<div> <strong>You: </strong> {item.content} </div>): (<div><strong>Chat GPT: </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
+            {item.role === 'user' ? (<div> <strong>You: </strong> {item.content} </div>): (<div><strong>Story Teller: </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
           </div>
         ))}
         {isPending && (
@@ -164,8 +202,8 @@ const updateUserNoteList = () => {
           />
           </div>
           <div style={{ display: 'flex', flexDirection: 'row', width: '100%'}}>
-          <button style={{ flex: 1 }} onClick={handleUserInput}>Enter ⬆️</button>
-          <button style={{ flex: 1 }}>Undo Last Action ↩️</button>
+          <button id="submit" style={{ flex: 1 }} onClick={handleUserInput}>Enter ⬆️</button>
+          <button style={{ flex: 1 }} onClick={undoAction}>Undo Last Action ↩️</button>
           <button style={{ flex: 1 }} onClick={saveGame}>Save Game &#x1F4BE;</button>
         </div>
       </div>
