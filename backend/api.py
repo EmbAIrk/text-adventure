@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from backend.gpt import GPT
 from fastapi.middleware.cors import CORSMiddleware
-from backend.database import Database
+from backend.Database import Database
 
 app = FastAPI()
 
@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-db = Database("sqlite:///game_database.db")
+db = Database("mysql+mysqlconnector://{user}:{password}@{host}:{port}/{db}".format(user="root",password="",host="localhost",port="3306",db="textadventure"))
 
 @app.post('/request')
 async def getStream(request: Request):
