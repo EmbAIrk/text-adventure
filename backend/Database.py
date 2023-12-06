@@ -17,14 +17,22 @@ class Database:
         
         Args:
             id (string): id of data in db
-            
+        
         Returns:
             context and notes from database
         '''
-        self.cursor.callproc('FetchData',(id))
-        return self.cursor.fetchall()
+        # p1 and p2 are required, but don't mean anything. callproc requires these placeholders for the OUT vars, 
+        # but they are replaced by the function with @_FetchData_1 and @_FetchData_2
+        self.cursor.callproc('FetchData',(id,"p1","p2"))
+        self.cursor.execute("SELECT @_FetchData_1, @_FetchData_2")
+        result = self.cursor.fetchone()
+        context = result[0]
+        notes = result[1]
+        if (context and notes):
+            return {"context": result[0], "notes": result[1]}
+        else:
+            return None
 
-    
 
     def save_data(self, context, notes):
         '''
@@ -39,8 +47,14 @@ class Database:
         '''
         id = ''.join(random.choices(string.ascii_letters, k=16))
         self.cursor.callproc('SaveData',(id,context,notes))
+        self.connection.commit()
+        return id
+    
     
     def close_connection(self):
+        '''
+        Disconnects database cursor and database.
+        '''
         self.cursor.close()
         self.connection.close()
     
