@@ -58,33 +58,6 @@ async def getStream(request: Request):
     converted = await request.json()
     return StreamingResponse(GPT.connect_api(converted))
 
-@app.post('/requestTest')
-async def test(request: Request):
-    """
-    Takes a request and converts it to a json object to then be sent to gpt file
- 
-    Args:
-        a (json): request stream
-        
-    Example:
-    [
-        {
-            "role": "system",
-            "content": "The player would like to face USERINPUT as obstacles, have USERINPUT as the final goal, and have the setting as USERINPUT."
-        },
-        {
-            "role": "user",
-            "content": "Start the story"
-        }
-    ]
- 
-    Returns:
-        converted json object sent to generator function
-    """
-    texts = await request.json()
-    gen = StreamingResponse(GPT.testgenerator(texts))
-    return gen
-
 @app.post('/saveGame')
 async def save_game(request: Request):
     """
