@@ -61,14 +61,15 @@ async def getStream(request: Request):
 @app.post('/saveGame')
 async def save_game(request: Request):
     """
-    Saves current game state using key value pair. NOTE: context must be pre-serialized into JSON (aka be a string)
+    Saves current game state using key value pair. 
+    NOTE: context must be pre-serialized into JSON (aka be a string). JSON.stringify can be used.
  
     Args:
         request (Request) : JSON that contains context and notes
         
     Example:
     {
-        "context": "[{'role':'user', 'message':'bruh']",
+        "context": "[{\"role\":\"user\", \"message\":\"bruh\"}]",
         "notes": "blah blah blah test2"
     }
  
@@ -81,9 +82,18 @@ async def save_game(request: Request):
     }
     """
     request = await request.json()
-    context = request["context"]
-    notes = request["notes"]
-    saved_key = db.save_data(context, notes)
+    try:
+        context = request["context"]
+    except KeyError:
+        raise HTTPException(status_code=400, detail="Context not found in JSON")
+    try:
+        notes = request["notes"]
+    except KeyError:
+        raise HTTPException(status_code=400, detail="Notes not found in JSON")
+    try:
+        saved_key = db.save_data(context, notes)
+    except TypeError:
+        raise HTTPException(status_code=400, detail="Context must be a string (serialize into JSON (JSON.stringify))")
     return {"key": saved_key}
 
 @app.post('/loadGame')
@@ -101,16 +111,20 @@ async def load_game(request: Request):
  
     Returns:
         Saved data or message if key is not found. 
-        NOTE: context is pre-serialized into JSON (aka it is a string), so it will have to be deserialized in the front end
+        NOTE: context is pre-serialized into JSON (aka it is a string), so it will have to be deserialized in the front end (JSON.parse).
         
     Example:
     {
-        "context": "[{'role':'user', 'message':'bruh']",
+        "context": "[{\"role\":\"user\", \"message\":\"bruh\"}]",
         "notes": "blah blah blah test2"
     }
     """
     request = await request.json()
-    key = request["key"]
+    try:
+        key = request["key"]
+    except KeyError:
+        raise HTTPException(status_code=400, detail="Key not found in JSON")
+        
     
     saved_data = db.fetch_data(key)
     

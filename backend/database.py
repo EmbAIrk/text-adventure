@@ -4,11 +4,14 @@ import string
 
 class Database:
     def __init__(self):
-        self.connection=pymysql.connect(host='localhost',
-                                        user='root',
-                                        password='',
-                                        db='textadventure')
-        self.cursor = self.connection.cursor()
+        try:
+            self.connection=pymysql.connect(host='localhost',
+                                            user='root',
+                                            password='',
+                                            db='textadventure')
+            self.cursor = self.connection.cursor()
+        except pymysql.OperationalError:
+            raise Exception("Database is not running or can not be found.")
 
 
     def fetch_data(self, id):
