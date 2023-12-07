@@ -1,27 +1,15 @@
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
+import pymysql
 import random
 import string
 
 class Database:
-    def __init__(self, db_url):
-        self.engine = create_engine(db_url)
-        self.session = Session(self.engine)
+    def __init__(self):
+        self.connection=pymysql.connect(host='localhost',
+                                        user='root',
+                                        password='',
+                                        db='textadventure')
+        self.cursor = self.connection.cursor()
 
-    def execute_query(self, query, params=None):
-        '''
-        Executes given query on database
-        
-        Args:
-            query (string): actual query
-            params (dict): dictionary of parameters
-            
-        Returns:
-            result of executed query
-        '''
-        with self.session.begin() as connection:
-            result = connection.execute(text(query), params)
-        return result
 
     def fetch_data(self, id):
         '''
@@ -29,13 +17,22 @@ class Database:
         
         Args:
             id (string): id of data in db
-            
+        
         Returns:
             context and notes from database
         '''
-        query = "EXEC FetchData :id"
-        result = self.execute_query(query, params={"id": id})
-        return result.fetchone()
+        # p1 and p2 are required, but don't mean anything. callproc requires these placeholders for the OUT vars, 
+        # but they are replaced by the function with @_FetchData_1 and @_FetchData_2
+        self.cursor.callproc('FetchData',(id,"p1","p2"))
+        self.cursor.execute("SELECT @_FetchData_1, @_FetchData_2")
+        result = self.cursor.fetchone()
+        context = result[0]
+        notes = result[1]
+        if (context and notes):
+            return {"context": result[0], "notes": result[1]}
+        else:
+            return None
+
 
     def save_data(self, context, notes):
         '''
@@ -48,7 +45,16 @@ class Database:
         Returns:
             string : id of where data was stored
         '''
-        id = ''.join(random.choices(string.ascii_letters, k=20))
-        query = "EXEC SaveData :id, :context, :notes"
-        self.execute_query(query, params={"id": id, "context": context, "notes": notes})
+        id = ''.join(random.choices(string.ascii_letters, k=16))
+        self.cursor.callproc('SaveData',(id,context,notes))
+        self.connection.commit()
         return id
+    
+    
+    def close_connection(self):
+        '''
+        Disconnects database cursor and database.
+        '''
+        self.cursor.close()
+        self.connection.close()
+    
