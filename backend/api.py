@@ -21,7 +21,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-db = Database("sqlite:///game_database.db")
+db = Database()
+
+
+async def shutdown_event():
+    """
+    Attempts to close database connection when system is shut down.
+    """
+    db.close_connection()
+
+app.add_event_handler("shutdown", shutdown_event)
 
 @app.post('/request')
 async def getStream(request: Request):
@@ -50,34 +59,62 @@ async def getStream(request: Request):
     return StreamingResponse(GPT.connect_api(converted))
 
 @app.post('/saveGame')
-async def save_game(key: str, data: str):
+async def save_game(request: Request):
     """
-    Saves current game state using key value pair
+    Saves current game state using key value pair. NOTE: context must be pre-serialized into JSON (aka be a string)
  
     Args:
-        a (str): key
-        b (str): value
+        request (Request) : JSON that contains context and notes
+        
+    Example:
+    {
+        "context": "[{'role':'user', 'message':'bruh']",
+        "notes": "blah blah blah test2"
+    }
  
     Returns:
         A save key
+        
+    Example:
+    {
+        "key": "FVoDxxJQAnIjihvt"
+    }
     """
-    saved_key = db.save_data(key, data)
+    request = await request.json()
+    context = request["context"]
+    notes = request["notes"]
+    saved_key = db.save_data(context, notes)
     return {"key": saved_key}
 
-@app.get('/loadGame/{key}')
-async def load_game(key: str):
+@app.post('/loadGame')
+async def load_game(request: Request):
     """
     Loads any saved game state given a save key
  
     Args:
-        a (str): Save key
+        request (Request): JSON object containing key
+    
+    Example:
+    {
+        "key": "FVoDxxJQAnIjihvt"
+    }
  
     Returns:
-        Saved data or no data if key is not found
+        Saved data or message if key is not found. 
+        NOTE: context is pre-serialized into JSON (aka it is a string), so it will have to be deserialized in the front end
+        
+    Example:
+    {
+        "context": "[{'role':'user', 'message':'bruh']",
+        "notes": "blah blah blah test2"
+    }
     """
-    saved_data = db.get_save_data(key)
+    request = await request.json()
+    key = request["key"]
+    
+    saved_data = db.fetch_data(key)
     
     if saved_data:
-        return {"data": saved_data[0]}
+        return saved_data
     else:
         raise HTTPException(status_code=404, detail="Save data not found")

@@ -17,3 +17,7 @@ Utilizing the Run & Debug window in vscode, run the `Python: FastAPI` run config
 
 
 ## Database
+Create empty database called textadventure in phpMyAdmin (We hosted through XAMPP).
+Click on Import, then upload the .sql file from the sql folder in our repo.
+You don't need to change any other settings, once you have chosen the .sql file, hit import and you will have the login table and stored procedures that the textadventure game uses.
+As long as the server/database is running through localhost (port 3306 by default, can be changed in database.py) in a database titled 'textadventure', the game should work.
