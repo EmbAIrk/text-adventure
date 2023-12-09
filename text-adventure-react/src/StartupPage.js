@@ -77,7 +77,7 @@ const StartupPage = ({ onStartGame, onLoadGame}) => {
           type="text"
           value={savedGameKeyLocal}
           onChange={(e) => setSavedGameKeyLocal(e.target.value)}
-          placeholder="xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx"
+          placeholder="16-Digit Unique Adventure Code"
           style={{textAlign: 'center'}}
         />
         <br/>

@@ -85,30 +85,73 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
     }
   };
 
+  const fetchInitialResponse = async () => {
+    setIsPending(true);
+    try {
+      
+      const response = await fetch('http://localhost:8000/request', {
+        method: 'POST',
+        body: JSON.stringify({
+          role: 'user',
+          content: initialMessage,
+        }),
+      });
+      //console.log(formatConversation);
+      console.log('Request Body:', JSON.stringify(formatConversation.map((item) => ({
+        role: item.role,
+        content: item.content,
+      }))));
+
+      if (!response.body) {
+        throw new Error('Response is empty!');
+      }
+      
+      const reader = response.body.getReader();
+      let result = await reader.read();
+      console.log(result);
+      let decodedResponse = '';
+      while (!result.done) {
+        decodedResponse += new TextDecoder().decode(result.value);
+        result = await reader.read();
+      }
+      setLastResponse(decodedResponse);
+      
+      setIsPending(false);
+    } catch (error) {
+      console.error('There was an error processing the input', error);
+    }
+  };
 
   const saveGame = async () => {
     setIsPending(true);
     try {
+      const saveGamePayload = {
+        context: JSON.stringify(formatConversation.map((item) => ({
+          role: item.role,
+          content: item.content,
+        }))),
+        notes: userNoteList.join(', ')
+      };
+      
+      console.log(saveGamePayload);
+      console.log(JSON.stringify(saveGamePayload));
+      
       const response = await fetch('http://localhost:8000/saveGame', {
         method: 'POST',
-        body: JSON.stringify({
-          formatConversation: formatConversation.map((item) => ({
-            role: item.role,
-            content: item.content,
-          })),
-          notes: userNoteList.map((note) => note),
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(saveGamePayload),
       });
-
+      console.log(response)
       if (!response.ok) {
         throw new Error('Failed to save game');
       }
-  
+      
       const responseData = await response.json();
-     
-      //read in value returned from API
-      //const savedKey = responseData.something;
-      //setUserKey(savedKey);
+      // read in value returned from API
+      const savedKey = responseData.key;
+      setUserKey(savedKey);
     } catch (error) {
       console.error('Error saving game:', error);
     } finally {
@@ -117,6 +160,39 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
     }
   };
   
+  const loadGame = async (savedGameKey) => {
+    setIsPending(true);
+    try {
+      
+      const response = await fetch('http://localhost:8000/loadGame', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          key: savedGameKey,
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load game');
+      }
+      
+      const responseData = await response.json();
+      console.log('Response Data:', responseData); // Log the entire response data
+      const contextArray = JSON.parse(responseData.context);
+      const notesArray = responseData.notes.split(', ');
+      console.log('Parsed Context Array:', contextArray); // Log the parsed context array
+      setFormatConversation(contextArray);
+      setUserNoteList(notesArray);
+      console.log(formatConversation)
+      
+    } catch (error) {
+      console.error('Error loading game:', error);
+    } finally {
+      setIsPending(false);
+    }
+  };
 
 const updateUserNoteList = () => {
   setUserNoteList((prevUserNoteList) => [
@@ -152,6 +228,7 @@ const updateUserNoteList = () => {
       setFormatConversation((prevConversation) => 
       prevConversation.slice(0, -2)
     );
+    console.log(formatConversation);
       parseInventory(formatConversation[formatConversation.length - 1].content)
       console.log(formatConversation);
     }
@@ -169,7 +246,10 @@ const updateUserNoteList = () => {
   }, [formatConversation]);
 
   useEffect(() => {
-    setUserInput(initialMessage + savedGameKey);
+    //fetchInitialResponse();
+    if(savedGameKey) {
+      loadGame(savedGameKey);}
+    //setUserInput(initialMessage + savedGameKey);
   }, []);
 
   return (
@@ -179,7 +259,7 @@ const updateUserNoteList = () => {
         <div style={{ height: '65%', border: '1px solid #ddd', padding: '30px', marginBottom: '10px', overflowY: 'auto'}}>
         {formatConversation.map((item, index) => (
           <div key={index} style={{ textAlign: item.role === 'user' ? 'right' : 'left', marginBottom: '20px' }}>
-            {item.role === 'user' ? (<div> <strong>You: </strong> {item.content} </div>): (<div><strong>Story Teller: </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
+            {item.role === 'user' ? (<div> <strong>You: </strong> {item.content} </div>): (<div><strong>Storyteller: </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
           </div>
         ))}
         {isPending && (
@@ -246,7 +326,7 @@ const updateUserNoteList = () => {
           {isGameSaved && (
           <div style={{ height: 'auto', border: '1px solid #ddd', padding: '10px', marginBottom: '10px', marginTop: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <h3 style={{ margin: '0', textAlign: 'center' }}>Save Key</h3>
-            <p id="saveKey" style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '10px' }}>516s25-ea680036-th3959078</p>
+            <p id="saveKey" style={{ textAlign: 'center', fontWeight: 'bold', marginBottom: '10px' }}>{userKey}</p>
           </div>)}
         </div>
         
