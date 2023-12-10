@@ -10,7 +10,11 @@ const StartupPage = ({ onStartGame, onLoadGame}) => {
   const handleEmbark = () => {
     // Placeholder for data validation
     let initialMessage = '';
-    if (modifiers === '')
+    if (!gameplayTheme && !modifiers)
+    {
+      initialMessage = '';
+    }
+    else if (modifiers === '')
     {
     initialMessage = `Start a ${gameplayTheme}-themed choose your own adventure.`
     }

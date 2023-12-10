@@ -10,11 +10,21 @@ const App = () => {
   const [savedGameKey, setSavedGameKey] = useState('');
 
   const handleStartGame = (initialMessage) => {
+    if (!initialMessage)
+    {
+      alert("You must select a theme to continue!");
+      return;
+    }
     setInitialMessage(initialMessage);
     setShowAdventurePage(true);
   };
 
   const handleLoadGame = (savedGameKey) => {
+    if (!savedGameKey)
+    {
+      alert("You must enter a saved game key to continue!");
+      return;
+    }
     setSavedGameKey(savedGameKey);
     setShowAdventurePage(true);
   }

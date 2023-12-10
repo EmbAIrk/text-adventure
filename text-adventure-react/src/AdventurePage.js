@@ -12,9 +12,12 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
   const [userNoteList, setUserNoteList] = useState([]);
   const [isPending, setIsPending] = useState(false);
   const [formatConversation, setFormatConversation] = useState([]);
+  const [tempConversation, setTempConversation] = useState([]);
   const [isGameSaved, setIsGameSaved] = useState(false);
   const [hoverIndex, setHoverIndex] = useState(null);
   const [userKey, setUserKey] = useState('');
+  //const [init, setInit] = useState('');
+  //const [stream, setStream] = useState(false);
 
   const handleUserInput = () => {
     if (userInput === '')
@@ -38,8 +41,10 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
     
   };
 
+
   const fetchResponse = async () => {
     setIsPending(true);
+    let newResponse = '';
     try {
       
       const response = await fetch('http://localhost:8000/request', {
@@ -64,57 +69,83 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
       }
       
       const reader = response.body.getReader();
-      let result = await reader.read();
-      console.log(result);
+      newResponse = await writeToTextbox(reader);
+      /*let result = await reader.read();
       let decodedResponse = '';
       while (!result.done) {
+        //const chunk = new TextDecoder().decode(result.value);
         decodedResponse += new TextDecoder().decode(result.value);
+        
         result = await reader.read();
-      }
-      setLastResponse(decodedResponse);
-      
-      setFormatConversation((prevConversation) => [
-        ...prevConversation,
-        {role: 'assistant', content: decodedResponse },
-      ]);
+      }*/
 
       
-      setIsPending(false);
+      
     } catch (error) {
       console.error('There was an error processing the input', error);
     }
+    finally {
+      setFormatConversation((prevConversation) => [
+        ...prevConversation,
+        {role: 'assistant', content: newResponse },
+      ]);
+      setLastResponse(formatConversation[formatConversation.length - 1]?.content);
+      parseInventory(lastResponse);
+    
+    setIsPending(false);
+    }
   };
 
-  const fetchInitialResponse = async () => {
-    setIsPending(true);
+   async function writeToTextbox(reader) {
+    const outputTextarea = document.getElementById('pendingResponse'); 
+    //outputTextarea.content = "Storyteller: "
+    let decodedResponse = '';
     try {
       
+      while (true) {
+        const { done, value } = await reader.read();
+  
+        if (done) {
+          break;
+        }
+        let decodedChunk = new TextDecoder().decode(value)
+        decodedResponse += new TextDecoder().decode(value);
+        outputTextarea.innerHTML += decodedChunk;
+        outputTextarea.scrollTop = outputTextarea.scrollHeight;
+        //response = outputTextarea.textContent;
+      }
+    } catch (error) {
+      console.error('Error reading response:', error);
+    } finally {
+      //reader.releaseLock();
+      setLastResponse(decodedResponse);
+      setIsPending(false);
+    }
+    return decodedResponse;
+    }
+  const fetchInitialResponse = async () => {
+    setIsPending(true);  
+    try {
+      console.log(tempConversation);
       const response = await fetch('http://localhost:8000/request', {
         method: 'POST',
-        body: JSON.stringify({
-          role: 'user',
-          content: initialMessage,
-        }),
+        body: JSON.stringify(tempConversation.map((item) => ({
+          role: item.role,
+          content: item.content,
+        }))),
       });
-      //console.log(formatConversation);
-      console.log('Request Body:', JSON.stringify(formatConversation.map((item) => ({
-        role: item.role,
-        content: item.content,
-      }))));
 
       if (!response.body) {
         throw new Error('Response is empty!');
       }
       
       const reader = response.body.getReader();
-      let result = await reader.read();
-      console.log(result);
-      let decodedResponse = '';
-      while (!result.done) {
-        decodedResponse += new TextDecoder().decode(result.value);
-        result = await reader.read();
-      }
-      setLastResponse(decodedResponse);
+      let firstResponse = await writeToTextbox(reader);
+      setLastResponse(firstResponse);
+      setFormatConversation((prevConversation) => [
+        ...prevConversation,
+        {role: 'assistant', content: firstResponse },
+      ]);
       
       setIsPending(false);
     } catch (error) {
@@ -229,8 +260,8 @@ const updateUserNoteList = () => {
       prevConversation.slice(0, -2)
     );
     console.log(formatConversation);
-      parseInventory(formatConversation[formatConversation.length - 1].content)
-      console.log(formatConversation);
+    const newLast = (formatConversation[formatConversation.length - 1].content)
+      parseInventory(newLast);
     }
   }
 
@@ -246,25 +277,44 @@ const updateUserNoteList = () => {
   }, [formatConversation]);
 
   useEffect(() => {
-    //fetchInitialResponse();
-    if(savedGameKey) {
+    
+    if (tempConversation.length === 1) {
+      fetchInitialResponse();
+      tempConversation.pop(0);
+    }
+  }, [tempConversation]);
+
+  useEffect( () => {
+    if(initialMessage !== '') {
+      let m = initialMessage;
+      console.log(m);
+  //console.log(initialMessage)
+  setTempConversation(() => [
+    
+    { role: 'system', content: m },
+  ]);
+}
+}, []);
+  
+  useEffect( () => {
+        if(savedGameKey) {
       loadGame(savedGameKey);}
-    //setUserInput(initialMessage + savedGameKey);
-  }, []);
+    //else if (initialMessage) {
+      //console.log(initialMessage)}
+      //fetchInitialResponse();
+    }, [savedGameKey]);
 
   return (
     <div style={{ display: 'flex', margin: '20px', justifyContent: 'center', alignItems: 'flex-start' }}>
       <div style={{ flex: 1, marginRight: '20px', height: '100vh' }}>
-        <h1 style={{ textAlign: 'center', marginTop: '0' }}>Your Adventure</h1>
-        <div style={{ height: '65%', border: '1px solid #ddd', padding: '30px', marginBottom: '10px', overflowY: 'auto'}}>
+        <h1  style={{ textAlign: 'center', marginTop: '0' }}>Your Adventure</h1>
+        <div  style={{ height: '65%', border: '1px solid #ddd', padding: '30px', marginBottom: '10px', overflowY: 'auto'}}>
         {formatConversation.map((item, index) => (
           <div key={index} style={{ textAlign: item.role === 'user' ? 'right' : 'left', marginBottom: '20px' }}>
-            {item.role === 'user' ? (<div> <strong>You: </strong> {item.content} </div>): (<div><strong>Storyteller: </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
+            {item.role === 'user' ? (<div> <strong>&#128100; You </strong> <div>{item.content}</div> </div>): (<div><strong>🧙🏻 Storyteller </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
           </div>
         ))}
-        {isPending && (
-          <p>Generating your response...</p>
-        )}
+        {isPending && <div id="pendingResponse"><strong>Storyteller </strong><br /> </div>}
       </div>
         <div style={{ display: 'flex', flexDirection: 'column', }}>
           <input
@@ -289,7 +339,7 @@ const updateUserNoteList = () => {
       </div>
       <div style={{ flex: 1 }}>
         <h1 style={{ textAlign: 'center', marginTop: '0' }}>Player Resources</h1>
-        <div style={{ height: '250px', border: '1px solid #ddd', padding: '10px', marginBottom: '10px' }}>
+        <div style={{ height: '250px', border: '1px solid #ddd', padding: '10px', marginBottom: '10px', overflowY: 'auto' }}>
         <h3 style={{margin: '0', textAlign: "center"}}>Inventory</h3>
           <ul>
             {inventory.map((item, index) => (
