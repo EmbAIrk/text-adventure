@@ -49,21 +49,14 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
       
       const response = await fetch('http://localhost:8000/request', {
         method: 'POST',
-        /*headers: {
-          'Content-Type': 'application/json', 
-          'Authorization': 'Bearer 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',
-        },*/
         body: JSON.stringify(formatConversation.map((item) => ({
           role: item.role,
           content: item.content,
         }))),
       });
-      //console.log(formatConversation);
-      console.log('Request Body:', JSON.stringify(formatConversation.map((item) => ({
-        role: item.role,
-        content: item.content,
-      }))));
+
       setUserInput('');
+
       if (!response.body) {
         throw new Error('Response is empty!');
       }
@@ -89,16 +82,13 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
         ...prevConversation,
         {role: 'assistant', content: newResponse },
       ]);
-      setLastResponse(formatConversation[formatConversation.length - 1]?.content);
-      parseInventory(lastResponse);
-    
+      
     setIsPending(false);
     }
   };
 
    async function writeToTextbox(reader) {
     const outputTextarea = document.getElementById('pendingResponse'); 
-    //outputTextarea.content = "Storyteller: "
     let decodedResponse = '';
     try {
       
@@ -111,7 +101,7 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
         let decodedChunk = new TextDecoder().decode(value)
         decodedResponse += new TextDecoder().decode(value);
         outputTextarea.innerHTML += decodedChunk;
-        outputTextarea.scrollTop = outputTextarea.scrollHeight;
+        //outputTextarea.scrollTop = outputTextarea.scrollHeight;
         //response = outputTextarea.textContent;
       }
     } catch (error) {
@@ -197,9 +187,9 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
       
       const response = await fetch('http://localhost:8000/loadGame', {
         method: 'POST',
-        headers: {
+        /*headers: {
           'Content-Type': 'application/json',
-        },
+        },*/
         body: JSON.stringify({
           key: savedGameKey,
         })
@@ -216,10 +206,11 @@ const AdventurePage = ({savedGameKey, initialMessage}) => {
       console.log('Parsed Context Array:', contextArray); // Log the parsed context array
       setFormatConversation(contextArray);
       setUserNoteList(notesArray);
+      //parseInventory(contextArray[contextArray.legnth - 1].content);
       console.log(formatConversation)
       
     } catch (error) {
-      console.error('Error loading game:', error);
+      alert("Error loading game");
     } finally {
       setIsPending(false);
     }
@@ -251,6 +242,9 @@ const updateUserNoteList = () => {
         console.log(items);
         setInventory(items);
       }
+      else {
+        setInventory([]);
+      }
   };
 
   const undoAction = () => {
@@ -261,19 +255,25 @@ const updateUserNoteList = () => {
     );
     console.log(formatConversation);
     const newLast = (formatConversation[formatConversation.length - 1].content)
-      parseInventory(newLast);
+    //parseInventory(newLast);
     }
   }
 
   useEffect(() => {
+    console.log(lastResponse);
     parseInventory(lastResponse);
   }, [lastResponse]);
 
   useEffect(() => {
-    const lastItem = formatConversation[formatConversation.length - 1];
+    let lastItem = formatConversation[formatConversation.length - 1];
     if (formatConversation.length > 0 && lastItem.role !== 'assistant' ) {
       fetchResponse();
+      
     }
+    else if (formatConversation.length > 0){
+    lastItem = formatConversation[formatConversation.length - 1];
+      //console.log(lastItem.content)
+      parseInventory(lastItem.content)}
   }, [formatConversation]);
 
   useEffect(() => {
@@ -288,7 +288,6 @@ const updateUserNoteList = () => {
     if(initialMessage !== '') {
       let m = initialMessage;
       console.log(m);
-  //console.log(initialMessage)
   setTempConversation(() => [
     
     { role: 'system', content: m },
@@ -299,9 +298,6 @@ const updateUserNoteList = () => {
   useEffect( () => {
         if(savedGameKey) {
       loadGame(savedGameKey);}
-    //else if (initialMessage) {
-      //console.log(initialMessage)}
-      //fetchInitialResponse();
     }, [savedGameKey]);
 
   return (
@@ -311,10 +307,10 @@ const updateUserNoteList = () => {
         <div  style={{ height: '65%', border: '1px solid #ddd', padding: '30px', marginBottom: '10px', overflowY: 'auto'}}>
         {formatConversation.map((item, index) => (
           <div key={index} style={{ textAlign: item.role === 'user' ? 'right' : 'left', marginBottom: '20px' }}>
-            {item.role === 'user' ? (<div> <strong>&#128100; You </strong> <div>{item.content}</div> </div>): (<div><strong>🧙🏻 Storyteller </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
+            {item.role === 'user' ? (<div> <strong>&#128100; You </strong> <div>{item.content}</div> </div>): (<div><strong>🧙🏻 Adventure Master </strong> <div dangerouslySetInnerHTML={{ __html: item.content }}/></div>)}
           </div>
         ))}
-        {isPending && <div id="pendingResponse"><strong>Storyteller </strong><br /> </div>}
+        {isPending && <div id="pendingResponse"><strong>Adventure Master </strong><br /> </div>}
       </div>
         <div style={{ display: 'flex', flexDirection: 'column', }}>
           <input

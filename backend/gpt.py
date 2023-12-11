@@ -20,7 +20,7 @@ class GPT:
 
     systemMsg = "You are a text adventure author. Your goal is to set up a fun, but challenging, adventure for players " + \
                  "to make their way through to reach a certain goal. The players may only use items that were described in the scene. " + \
-                 "List the current items the player has in their possession after every interaction in an unordered list with <li> tags. If the player does not have any items, mention it. " + \
+                 "ESPECIALLY IMPORTANT: List the current items the player has in their possession after every interaction in an ordered list with <li> and </li> tags. If the player does not have any items, mention it. " + \
                  "Do not put items into players possession unless told otherwise. Draw a picture of the current area using emojis. " + \
                  "The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection. "
     
