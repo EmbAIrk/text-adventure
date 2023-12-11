@@ -4,22 +4,28 @@ import tiktoken
 
 class GPT:
 
-  def testgenerator():
-    s = ["a", "b", "c", "d"]
-    for i in s:
-      yield i
-
   def connect_api(texts: list):  
+    """
+    Sends a prompt to GPT through api calls, accounts for token limit.
+
+    Args:
+      list: a list of strings pertaining additions to the prompt.
+
+    Returns: 
+      a generator object comprising of string chunks returned by GPT 
+    
+    """
     if (texts is None):
       raise ("Null parameters are not accepted for this method.")
 
-    systemMsg = "You are a text adventure author. Your goal is to set up a fun, but challenging, adventure for players " + \
-                 "to make their way through to reach a certain goal. The players may only use items that were described in the scene. " + \
-                 "Do not put items into players possession unless told otherwise. Draw a picture of the current area using emojis. " + \
-                 "The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection. " + \
-                "On each response, list the current items the player has in their possession in an unordered HTML list. If the player does not have any items, mention it. "
+    # systemMsg = "You are a text adventure author. Your goal is to set up a fun, but challenging, adventure for players " + \
+    #             "to make their way through to reach a certain goal. The players may only use items that were described in the scene. " + \
+    #             "List the current items the player has in their possession after every interaction. If the player does not have any items, mention it. " + \
+    #             "Do not put items into players possession unless told otherwise. Draw a picture of the current area using emojis. " + \
+    #             "The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection. "
+    
     # for debugging, comment out when not using
-    # systemMsg = "You are a helpful assistant. "
+    systemMsg = "You are a helpful assistant. "
 
     if (texts[0]["role"] == "system"):
       systemMsg += texts[0]["content"]
@@ -44,13 +50,14 @@ class GPT:
     #ADD THIS LATER :)
     #client = OpenAI(api_key=os.environ.get('API_Key'))
 
-    client = openai.OpenAI(api_key="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")
+    client = openai.OpenAI(api_key="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")
     if (prompt is not None):
       try:
         response = client.chat.completions.create(
           model="gpt-3.5-turbo",
           stream =True,
-          messages=prompt
+          messages=prompt,
+          temperature=0.7
         )
         for chunk in response:
           data = chunk.choices[0].delta.content
