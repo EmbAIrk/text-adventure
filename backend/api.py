@@ -11,7 +11,6 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -85,7 +84,6 @@ async def save_game(request: Request):
     request = await request.json()
     try:
         context = request["context"]
-        print('Received Request Body:', request)
     except KeyError:
         raise HTTPException(status_code=400, detail="Context not found in JSON")
     try:

@@ -8,8 +8,7 @@ class Database:
             self.connection=pymysql.connect(host='localhost',
                                             user='root',
                                             password='',
-                                            db='textadventure'
-                                            )
+                                            db='textadventure')
             self.cursor = self.connection.cursor()
         except pymysql.OperationalError:
             raise Exception("Database is not running or can not be found.")
