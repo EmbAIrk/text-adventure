@@ -413,6 +413,7 @@ const AdventurePage = ({ savedGameKey, initialMessage }) => {
               width: "97%",
               padding: "10px",
               fontSize: "20px",
+              textAlign: "left"
             }}
           />
         </div>
@@ -485,6 +486,7 @@ const AdventurePage = ({ savedGameKey, initialMessage }) => {
           value={userNote}
           onChange={(e) => setUserNote(e.target.value)}
           placeholder="Write your notes here..."
+          style={{textAlign: "left"}}
         />
         <button
           onClick={(e) =>
