@@ -6,8 +6,6 @@ More information about each file can be found within the files' documentation.
 ## Frontend - React
 Requires the following libraries:
 - React (use `create-react-app` command to create a React project)
-- useState
-- useEffect
 
 To deploy the project, open a new terminal. Use the `cd` command to navigate to the folder containing the react app. Then, use `npm start` to launch to the web browser. By default, it runs on localhost:3000.
 
