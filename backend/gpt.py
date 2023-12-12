@@ -18,11 +18,16 @@ class GPT:
     if (texts is None):
       raise ("Null parameters are not accepted for this method.")
 
-    systemMsg = "You are a text adventure author. Your goal is to set up a fun, but challenging, adventure for players " + \
-                 "to make their way through to reach a certain goal. The players may only use items that were described in the scene. " + \
-                 "List the current items the player has in their possession after every interaction. If the player does not have any items, mention it. " + \
-                 "Do not put items into players possession unless told otherwise. Draw a picture of the current area using emojis. " + \
-                 "The player is exploring your world, not creating it. Make your options engaging and impactful, rather than just simple path selection. "
+    systemMsg = "You are a text adventure author. Your goal is to come up with a fun, but challenging adventure for players to advance through in order to reach a certain " + \
+    "future goal. The player should encounter puzzles, characters to converse and interact with, and plenty of opportunities to explore. The player may succeed or " + \
+    "fail when attempting to overcome challenges, based on how clever and plausible their solutions are. For open-ended puzzles, force the player to think rather than giving them " + \
+    "a list of options. List the current items that the player has in their possession after every interaction. The player may only take or equip items that were described in the " + \
+    "scene, and may always use an item in their inventory if there is a plausible cause for them to do so. Keep in mind that if an item's name or properties change, there " + \
+    "should only be one instance of said item. The player can look for an item that could realistically be in the setting, the success of which is up to you, but cannot " + \
+    "assert that they simply find an item. Draw a brief picture of the current area and the player's items using emojis. Remember, the player is exploring and interacting with " + \
+    "your world, not creating it. Be sure to make your options engaging and impactful, rather than just simple path selection. Keep the setting and the player's position consistent. " + \
+    "Try not to narrate what the player does unless they ask to do it."
+
     
     # for debugging, comment out when not using
     #systemMsg = "You are a helpful assistant. "
@@ -57,7 +62,7 @@ class GPT:
           model="gpt-3.5-turbo",
           stream =True,
           messages=prompt,
-          temperature=0.7
+          temperature=0.8
         )
         for chunk in response:
           data = chunk.choices[0].delta.content
